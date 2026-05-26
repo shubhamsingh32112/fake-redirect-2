@@ -1,16 +1,18 @@
 import { useEffect } from "react";
-
-const MATCHVIBE_URL = "https://www.matchvibe.co.in/";
+import { PLAY_STORE_URL } from "./redirectConfig.js";
+import { isPreviewBot } from "./isPreviewBot.js";
 
 export default function App() {
   useEffect(() => {
-    window.location.replace(MATCHVIBE_URL);
+    if (!isPreviewBot()) {
+      window.location.replace(PLAY_STORE_URL);
+    }
   }, []);
 
   return (
     <p style={{ fontFamily: "system-ui, sans-serif", padding: "1rem" }}>
       Redirecting to{" "}
-      <a href={MATCHVIBE_URL}>Match Vibe</a>...
+      <a href={PLAY_STORE_URL}>Google Play</a>...
     </p>
   );
 }
