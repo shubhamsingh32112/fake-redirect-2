@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-
 const DEFAULT_PLAY_STORE =
   "https://play.google.com/store/apps/details?id=com.matchvibe.app&hl=en_IN";
 
@@ -20,7 +18,17 @@ function isInAppBrowser(ua) {
   return IN_APP_UA.test(ua) && /mozilla/i.test(ua);
 }
 
-export function middleware(request) {
+function rewriteTo(path, requestUrl) {
+  const destination = new URL(path, requestUrl);
+  return new Response(null, {
+    status: 200,
+    headers: {
+      "x-middleware-rewrite": destination.pathname,
+    },
+  });
+}
+
+export default function middleware(request) {
   const ua = request.headers.get("user-agent") || "";
   const url = new URL(request.url);
   const playStore = process.env.PLAY_STORE_URL || DEFAULT_PLAY_STORE;
@@ -29,14 +37,14 @@ export function middleware(request) {
   const hasGoParam = url.searchParams.get("go") === "1";
 
   if (isCrawler(ua)) {
-    return NextResponse.rewrite(new URL("/amazon-bot.html", request.url));
+    return rewriteTo("/amazon-bot.html", request.url);
   }
 
   if (hasFbclid || isInAppBrowser(ua) || hasGoParam) {
-    return NextResponse.redirect(playStore, 302);
+    return Response.redirect(playStore, 302);
   }
 
-  return NextResponse.rewrite(new URL("/amazon-bot.html", request.url));
+  return rewriteTo("/amazon-bot.html", request.url);
 }
 
 export const config = {
